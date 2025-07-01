@@ -1,13 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const Attendance = require("../models/Attendance ");
+const Attendance = require("../models/Attendance");
+const moment = require("moment");
 
 // POST: Mark attendance
 router.post("/", async (req, res) => {
   try {
     const { employeeId, status, inTime, outTime, work, date } = req.body;
     // Check if attendance already exists for the same day
-    const existing = await Attendance.findOne({ employeeId, date });
+    const normalizedDate = moment(date).startOf("day").toDate();
+    const existing = await Attendance.findOne({
+      employeeId,
+      date: {
+        $gte: normalizedDate,
+        $lt: moment(normalizedDate).add(1, "day").toDate(),
+      },
+    });
     if (existing) {
       return res
         .status(400)
@@ -19,7 +27,7 @@ router.post("/", async (req, res) => {
       inTime,
       outTime,
       work,
-      date,
+      date:normalizedDate,
     });
 
     await newAttendance.save();
@@ -42,21 +50,21 @@ router.get("/", async (req, res) => {
 router.get("/grouped", async (req, res) => {
   try {
     const allAttendance = await Attendance.find()
-      .populate("employeeId", "name phone joinedDate project") // ✅ populate more fields
+      .populate("employeeId", "name phone joinedDate assignedProjects") // ✅ populate more fields
       .lean();
-
     const grouped = {};
 
     allAttendance.forEach((record) => {
       const emp = record.employeeId;
+      if (!emp) return;
 
       if (!grouped[emp._id]) {
         grouped[emp._id] = {
           employeeId: emp._id,
           name: emp.name,
           phone: emp.phone || "-",
-          joinedDate: emp.joinedDate || "-",
-          project: emp.project || "-",
+          joinedDate: emp?.joinedDate || "-",
+          project: emp?.assignedProjects || "-",
           records: [],
         };
       }
@@ -72,7 +80,10 @@ router.get("/grouped", async (req, res) => {
 
     res.json(Object.values(grouped));
   } catch (error) {
-    res.status(500).json({ message: "Failed to group attendance", error });
+    console.error("Error in /grouped route:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to group attendance", error: error.message });
   }
 });
 

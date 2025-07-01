@@ -20,7 +20,7 @@ const upload = multer({ storage: storage });
 // Admin adds material
 router.post("/add", adminAuth, upload.single("document"), async (req, res) => {
   try {
-    const { matCode, quantity, amount, addedBy, date, projectAssigned } =
+    const { name, matCode, quantity, amount, addedBy, date, projectAssigned } =
       req.body;
 
     const project = await Project.findById(projectAssigned);
@@ -29,6 +29,7 @@ router.post("/add", adminAuth, upload.single("document"), async (req, res) => {
     }
 
     const material = new Material({
+      name,
       matCode,
       quantity,
       availableQuantity: quantity,

@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema(
     },
     projectAssigned: {
       type: mongoose.Schema.Types.ObjectId, // or mongoose.Schema.Types.ObjectId if referencing Project model
+      ref: "Project",
       default: null,
     },
   },
