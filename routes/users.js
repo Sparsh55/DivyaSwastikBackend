@@ -4,7 +4,7 @@ const User = require("../models/User");
 const { auth, adminAuth } = require("../middleware/auth");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
-require('dotenv').config();
+require("dotenv").config();
 
 const router = express.Router();
 
@@ -93,13 +93,18 @@ router.post(
       await user.save();
 
       // Send email with plain password
-      await transporter.sendMail({
-        from: process.env.ADMIN_EMAIL,
-        to: 'sparssaxena9654@gmail.com',
-        subject: `New user: ${username}`,
-        text: `User created with:\n- Username: ${username}\n- Phone: ${phone}\n- Role: ${role}\n- Project: ${project.name}\n- Password: ${password}`,
-      });
+      try {
+        const info = await transporter.sendMail({
+          from: process.env.ADMIN_EMAIL,
+          to: "sparshsaxena9654@gmail.com",
+          subject: `New user: ${username}`,
+          text: `User created with:\n- Username: ${username}\n- Phone: ${phone}\n- Role: ${role}\n- Project: ${projectExists.name}\n- Password: ${password}`,
+        });
 
+        console.log("Email sent:", info.response);
+      } catch (err) {
+        console.error("Email send error:", err.message);
+      }
       res.status(201).json({
         success: true,
         message: "User created successfully",
@@ -359,7 +364,7 @@ router.put(
     // Send email to admin with updated password info
     const emailOptions = {
       from: process.env.ADMIN_EMAIL,
-      to: 'sparshsaxena9654@gmail.com',
+      to: "sparshsaxena9654@gmail.com",
       subject: `Password Reset for ${user.username}`,
       text: `Password was reset for user:\n\nUsername: ${
         user.username

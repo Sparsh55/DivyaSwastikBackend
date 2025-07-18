@@ -109,7 +109,7 @@ router.post('/verify-otp', [
 
     const { userId, otp } = req.body;
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).populate('projectAssigned');
     if (!user || !user.isActive) {
       return res.status(404).json({
         success: false,
@@ -143,7 +143,8 @@ router.post('/verify-otp', [
           phone: user.phone,
           role: user.role,
           image: user.deviceInfo?.loginImage?.path || null,
-          lastLogin: user.lastLogin
+          lastLogin: user.lastLogin,
+          projectAssigned: user.projectAssigned || null 
         }
       }
     });

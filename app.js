@@ -9,6 +9,7 @@ const projectRoutes = require('./routes/project.js');
 const materialRoutes = require('./routes/material.js')
 const employeeRoutes  = require('./routes/employee.js')
 const attendanceRoutes = require("./routes/attendance");
+const dprRoutes = require("./routes/dpr.js")
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/materials', materialRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/api/dpr',dprRoutes);
 app.use(cors({
   origin: '*', // For development only
   methods: ['GET', 'POST','DELETE','PUT']
